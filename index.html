@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Signal Checker</title>
+
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Signal">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEJ0lEQVR4nO3cXY4TQQyFUZ5rPbMwFjsLAgQCJfSkf24nLnfOUS3Asr/n+jYg8K16AHoTEBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQEREdCKj8/v1SNMTUArBPSYgB75Wc/vVz3IvAT0pb/1aOgBAS27q0dDXxHQMgFtJKAFi/VoaJGA7j2oR0P/E9CN1Xo0dEdANwS01xQBfX58eMde9enmCGhoqGc9Q0CtX/XRfpkloKGhhvWMqQIaGupWz5gtoKGhVvUMAXV81Se6MV1AQ0N96hlzBjQ01KSeMW1AQ0Md6hkCavSqD7Js3oCGhqavZ0we0NDQ3PWM+QMab99Q9fpXCGj2V73+FQ0CGm/cUPXi1/UIaLxlQ9Ur36RNQOPNGqpe9lYCmvRVL3urTgGNt2moes07NAtovEFD1Qvep19A49INVa92NwHN9apXu1vLgMZFG6pe6hFdAxqXa6h6nQc1DmhcqKHqRR4noCle9SKP6x3QuERD1SuMtA9oNG+oenmpKwQ02jZUvbYTCEhAkYsE9PH5vbyGve8a/wxdIaC//z6VN7Grnmv8VdU+oLu/w8rL2FXPBRrqHdD/n8+Vx3EgoNYNXS2g+Ru62KeLjQN68AlmeSW76mndUNeAVj9SLW9lVz19G2oZ0JafeMtzORBQx4YuG9BsDW2cuXq1u/ULaOMlpmpo18zVC96nWUC7LjFJQwdmrl7zDp0COnCJpgE1auj6AdU2dHjm6mVv1Sagw5cobCicuXrlm/QIKLxESUOnzFy9+HUNAjrlEk0Dmr+hNwrolQ2dOHP1+lfMHtCJl3hZQ6fPXH2ER6YO6PRLvKChJ81cfYovzRvQky7RNKBpG3rHgJ7X0FNnrj7IskkDeuolntTQC2auPsuCGQN6wSVOb+hlM1cf5950Ab3sEk0Dmq2htw7orIZePHP1iW7MFdCLL3FKQyUzVx/qn4kCKrlE2FDhzNXn+mOWgAov0TSgSRoS0PGGymeuPtovUwRUfokDDZVPO0lDUwQ0j431VI85EQHdENBeArqnnl0EtEA92wlomXo2EtAyAW0koC+pZwsBPaKeVQJaoZ7HBLRCQI8JiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIyA/mS/TnqqzB5wAAAABJRU5ErkJggg==">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --buy: #34d470; --sell: #d43434; --mid: #c8a84b;
+  --bg: #0a0a0a; --card: #111; --border: #1e1e1e;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: #e8e8e8;
+  min-height: 100vh;
+}
+
+/* TOP BAR */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid #181818;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.logo { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #333; }
+.topbar-right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.tb-btn {
+  font-size: 11px; font-weight: 600; border-radius: 6px; border: 1px solid;
+  padding: 6px 10px; cursor: pointer; font-family: inherit;
+}
+.tb-btn:active { opacity: 0.6; }
+.tb-btn.backup  { color: var(--buy);  background: #0a1c10; border-color: #1a4a28; }
+.tb-btn.restore { color: var(--mid);  background: #1a1508; border-color: #4a3a10; }
+.tb-btn.reset   { color: #555; background: none; border-color: #222; }
+label.tb-btn    { cursor: pointer; display: inline-flex; align-items: center; }
+#restoreFileInput { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.autosave { font-size: 10px; color: #2a6a3a; background: #0a1c10; border: 1px solid #1a4228; border-radius: 3px; padding: 2px 6px; opacity: 0; transition: opacity 0.3s; }
+.autosave.show { opacity: 1; }
+
+/* SIGNAL STRIP */
+.signal-strip {
+  display: flex; gap: 8px; padding: 10px 14px;
+  border-bottom: 1px solid #181818;
+}
+.sig {
+  flex: 1; text-align: center; border-radius: 8px;
+  padding: 9px 4px; border: 1px solid #1e1e1e; background: #111;
+  transition: all 0.3s;
+}
+.sig.on-buy  { background: #0a1c10; border-color: #1a6632; }
+.sig.on-sell { background: #1c0a0a; border-color: #661a1a; }
+.sig.on-mid  { background: #131010; border-color: #3a3020; }
+.sig-label { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2a2a2a; margin-bottom: 2px; }
+.sig-val   { font-size: 12px; font-weight: 700; color: #2a2a2a; transition: color 0.3s; }
+.sig.on-buy  .sig-val { color: var(--buy); }
+.sig.on-sell .sig-val { color: var(--sell); }
+.sig.on-mid  .sig-val { color: var(--mid); }
+
+/* TAB BAR */
+.tabbar {
+  position: sticky; top: 53px; z-index: 99;
+  background: var(--bg);
+  display: flex; border-bottom: 1px solid #181818;
+}
+.tab {
+  flex: 1; text-align: center; padding: 12px 4px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #333; cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s; user-select: none;
+}
+.tab:active { background: #141414; }
+.tab.active.buy  { color: var(--buy);  border-bottom-color: var(--buy); }
+.tab.active.sell { color: var(--sell); border-bottom-color: var(--sell); }
+.tab.active.mid  { color: var(--mid);  border-bottom-color: var(--mid); }
+
+/* PANELS */
+.panel { display: none; flex-direction: column; gap: 10px; padding: 14px 14px 100px; }
+.panel.active { display: flex; }
+
+/* PROGRESS */
+.prog-meta { font-size: 10px; color: #333; margin-bottom: 5px; }
+.prog-bar  { height: 2px; background: #1a1a1a; border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; width: 0%; transition: width 0.25s; }
+.prog-fill.buy  { background: var(--buy); }
+.prog-fill.sell { background: var(--sell); }
+.prog-fill.mid  { background: var(--mid); }
+
+/* SECTION HEADER */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; }
+.sec-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #333; }
+.edit-btn {
+  font-size: 11px; color: #444; background: none;
+  border: 1px solid #222; border-radius: 5px;
+  padding: 5px 10px; cursor: pointer; font-family: inherit;
+}
+.edit-btn:active { background: #181818; }
+
+/* EDIT PANEL */
+.edit-panel { display: none; flex-direction: column; gap: 8px; background: #111; border: 1px solid #222; border-radius: 10px; padding: 12px; }
+.edit-panel.open { display: flex; }
+.edit-panel-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #333; }
+.edit-rows { display: flex; flex-direction: column; gap: 6px; }
+.edit-row  { display: flex; gap: 8px; align-items: center; }
+.edit-input {
+  flex: 1; min-width: 0;
+  background: #181818; border: 1px solid #252525; border-radius: 6px;
+  color: #ddd; font-size: 15px; padding: 10px; outline: none;
+  font-family: inherit; -webkit-appearance: none;
+}
+.edit-input:focus { border-color: #383838; }
+.del-btn { background: none; border: none; color: #383838; cursor: pointer; font-size: 24px; padding: 2px 6px; line-height: 1; flex-shrink: 0; }
+.del-btn:active { color: var(--sell); }
+.add-btn { width: 100%; background: none; border: 1px dashed #252525; border-radius: 6px; color: #383838; font-size: 13px; padding: 10px; cursor: pointer; font-family: inherit; }
+.add-btn:active { border-color: #444; color: #666; }
+.save-btn { width: 100%; border-radius: 6px; font-size: 14px; font-weight: 700; padding: 12px; cursor: pointer; font-family: inherit; border: 1px solid; }
+.save-btn.buy-s  { background: #111e15; border-color: #1a4a28; color: var(--buy); }
+.save-btn.mid-s  { background: #1a1508; border-color: #4a3a10; color: var(--mid); }
+.save-btn.sell-s { background: #1e1010; border-color: #4a1a1a; color: var(--sell); }
+.save-btn:active { opacity: 0.7; }
+
+/* RULE ITEMS */
+.rules-list { display: flex; flex-direction: column; gap: 6px; }
+.rule-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 13px 12px;
+  user-select: none; transition: border-color 0.15s, background 0.15s;
+}
+.rule-item.checked.buy  { border-color: #1a5a30; background: #0a1c10; }
+.rule-item.checked.sell { border-color: #5a1a1a; background: #1c0a0a; }
+.rule-item.checked.mid  { border-color: #4a3a10; background: #181208; }
+.rule-move { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.move-btn { background: none; border: none; color: #2a2a2a; cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 3px; line-height: 1; }
+.move-btn:active { color: #ccc; background: #222; }
+.move-btn:disabled { opacity: 0.1; }
+.checkbox {
+  width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid #2a2a2a;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.rule-item.checked.buy  .checkbox { background: var(--buy);  border-color: var(--buy); }
+.rule-item.checked.sell .checkbox { background: var(--sell); border-color: var(--sell); }
+.rule-item.checked.mid  .checkbox { background: var(--mid);  border-color: var(--mid); }
+.checkmark { opacity: 0; transition: opacity 0.12s; }
+.rule-item.checked .checkmark { opacity: 1; }
+.rule-text { font-size: 14px; color: #666; flex: 1; line-height: 1.45; cursor: pointer; transition: color 0.15s; min-width: 0; word-break: break-word; }
+.rule-item.checked .rule-text { color: #ddd; }
+.empty-state { text-align: center; padding: 30px 10px; color: #2a2a2a; font-size: 13px; line-height: 1.7; border: 1px dashed #1e1e1e; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">Signal Checker</span>
+  <div class="topbar-right">
+    <span class="autosave" id="autosaveBadge">✓ saved</span>
+    <button class="tb-btn backup" onclick="backupData()">⬇ Backup</button>
+    <label  class="tb-btn restore" for="restoreFileInput">⬆ Restore</label>
+    <input type="file" id="restoreFileInput" accept=".json" onchange="restoreData(event)">
+    <button class="tb-btn reset" onclick="resetAll()">↺</button>
+  </div>
+</div>
+
+<div class="signal-strip">
+  <div class="sig" id="buySignalBox"><div class="sig-label">Buy</div><div class="sig-val" id="buySignalText">—</div></div>
+  <div class="sig" id="midSignalBox"><div class="sig-label">Discipline</div><div class="sig-val" id="midSignalText">—</div></div>
+  <div class="sig" id="sellSignalBox"><div class="sig-label">Sell</div><div class="sig-val" id="sellSignalText">—</div></div>
+</div>
+
+<div class="tabbar">
+  <div class="tab buy active" onclick="switchTab('buy')">▲ Buy</div>
+  <div class="tab mid"        onclick="switchTab('mid')">◈ Mind</div>
+  <div class="tab sell"       onclick="switchTab('sell')">▼ Sell</div>
+</div>
+
+<!-- BUY PANEL -->
+<div class="panel active" id="panel-buy">
+  <div class="prog-meta" id="buyProgressLabel">0 of 0</div>
+  <div class="prog-bar"><div class="prog-fill buy" id="buyProgressFill"></div></div>
+  <div class="sec-hdr">
+    <span class="sec-title">Buy Rules</span>
+    <button class="edit-btn" id="buyEditBtn" onclick="toggleEdit('buy')">✎ Edit</button>
+  </div>
+  <div class="edit-panel" id="buyEditPanel">
+    <div class="edit-panel-lbl">Edit buy rules</div>
+    <div class="edit-rows" id="buyEditRows"></div>
+    <button class="add-btn" onclick="addRow('buy')">+ Add rule</button>
+    <button class="save-btn buy-s" onclick="saveRules('buy')">Save Rules</button>
+  </div>
+  <div class="rules-list" id="buyRulesList"></div>
+</div>
+
+<!-- MID PANEL -->
+<div class="panel" id="panel-mid">
+  <div class="prog-meta" id="midProgressLabel">0 of 0</div>
+  <div class="prog-bar"><div class="prog-fill mid" id="midProgressFill"></div></div>
+  <div class="sec-hdr">
+    <span class="sec-title">Discipline Rules</span>
+    <button class="edit-btn" id="midEditBtn" onclick="toggleEdit('mid')">✎ Edit</button>
+  </div>
+  <div class="edit-panel" id="midEditPanel">
+    <div class="edit-panel-lbl">Edit discipline rules</div>
+    <div class="edit-rows" id="midEditRows"></div>
+    <button class="add-btn" onclick="addRow('mid')">+ Add rule</button>
+    <button class="save-btn mid-s" onclick="saveRules('mid')">Save Rules</button>
+  </div>
+  <div class="rules-list" id="midRulesList"></div>
+</div>
+
+<!-- SELL PANEL -->
+<div class="panel" id="panel-sell">
+  <div class="prog-meta" id="sellProgressLabel">0 of 0</div>
+  <div class="prog-bar"><div class="prog-fill sell" id="sellProgressFill"></div></div>
+  <div class="sec-hdr">
+    <span class="sec-title">Sell Rules</span>
+    <button class="edit-btn" id="sellEditBtn" onclick="toggleEdit('sell')">✎ Edit</button>
+  </div>
+  <div class="edit-panel" id="sellEditPanel">
+    <div class="edit-panel-lbl">Edit sell rules</div>
+    <div class="edit-rows" id="sellEditRows"></div>
+    <button class="add-btn" onclick="addRow('sell')">+ Add rule</button>
+    <button class="save-btn sell-s" onclick="saveRules('sell')">Save Rules</button>
+  </div>
+  <div class="rules-list" id="sellRulesList"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'sc3_state';
+
+const DEFAULT_BUY = [
+  'Price above 200 EMA',
+  'RSI above 50',
+  'MACD crossed above signal line',
+  'Volume above 20-period average',
+  'Higher high and higher low confirmed'
+];
+const DEFAULT_MID = [
+  'I have waited for confirmation',
+  'I am not revenge trading',
+  'Risk is within my 1% rule',
+  'I am not entering too fast',
+  'I have checked higher timeframe'
+];
+
+let state = {
+  buy:  { rules: [], checks: {} },
+  mid:  { rules: [], checks: {} },
+  sell: { rules: [], checks: {} }
+};
+let editOpen = { buy: false, mid: false, sell: false };
+let saveTimer = null;
+
+/* ── INVERSION ── */
+function invertRule(rule) {
+  const pairs = [
+    ['crossed above','crossed below'],['higher high and higher low','lower high and lower low'],
+    ['above','below'],['over','under'],['overbought','oversold'],['bullish','bearish'],
+    ['uptrend','downtrend'],['up trend','down trend'],['upward','downward'],['uprising','downswing'],
+    ['rising','falling'],['increasing','decreasing'],['higher','lower'],['breakout','breakdown'],
+    ['support','resistance'],['long','short'],['buy','sell'],['green','red'],
+    ['positive','negative'],['strong','weak'],['strength','weakness'],['expanding','contracting'],
+    ['wide','narrow'],['high','low'],['top','bottom'],['peak','trough'],['advance','decline'],
+  ];
+  const tok = [];
+  let r = rule.replace(/\b(level\s*)?\d+(\.\d+)?(%?)\b/gi, m => { tok.push(m); return '\x03'+(tok.length-1)+'\x04'; });
+  let changed = false;
+  for (const [a,b] of pairs) {
+    const esc = s => s.replace(/\s+/g,'\\s+');
+    if (new RegExp('\\b'+esc(a)+'\\b','gi').test(r)||new RegExp('\\b'+esc(b)+'\\b','gi').test(r)) {
+      r = r.replace(new RegExp('\\b'+esc(a)+'\\b','gi'),m=>'\x00'+b+(m[0]===m[0].toUpperCase()?'\x01':'\x02'))
+           .replace(new RegExp('\\b'+esc(b)+'\\b','gi'),m=>'\x00'+a+(m[0]===m[0].toUpperCase()?'\x01':'\x02'));
+      changed = true;
+    }
+  }
+  r = r.replace(/\x00(.*?)\x01/g,(_,w)=>w[0].toUpperCase()+w.slice(1))
+       .replace(/\x00(.*?)\x02/g,(_,w)=>w)
+       .replace(/\x03(\d+)\x04/g,(_,i)=>tok[+i]);
+  return changed ? r : rule+' (inverted)';
+}
+
+/* ── STORAGE ── */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p && p.buy && p.sell && p.mid &&
+          Array.isArray(p.buy.rules) && Array.isArray(p.sell.rules) && Array.isArray(p.mid.rules)) {
+        state = p;
+        return;
+      }
+    }
+  } catch(e) {}
+  // Defaults
+  state.buy.rules  = [...DEFAULT_BUY];
+  state.mid.rules  = [...DEFAULT_MID];
+  state.sell.rules = DEFAULT_BUY.map(invertRule);
+  state.buy.checks = {}; state.mid.checks = {}; state.sell.checks = {};
+}
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  const b = document.getElementById('autosaveBadge');
+  b.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>b.classList.remove('show'), 1800);
+}
+
+/* ── TABS ── */
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.tab.'+t).classList.add('active');
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ── RENDER ── */
+function renderAll() { ['buy','mid','sell'].forEach(renderCol); }
+
+function renderCol(col) {
+  const { rules, checks } = state[col];
+  const list = document.getElementById(col+'RulesList');
+  if (!list) return;
+
+  if (!rules || rules.length === 0) {
+    list.innerHTML = '<div class="empty-state">No rules yet.<br>Tap ✎ Edit to add some.</div>';
+    setProgress(col, 0, 0);
+    setSignal(col, 0, 0);
+    return;
+  }
+
+  list.innerHTML = rules.map((rule, i) => {
+    const ck = !!checks[String(i)];
+    return `<div class="rule-item${ck?' checked '+col:''}">
+      <div class="rule-move">
+        <button class="move-btn" onclick="moveRule('${col}',${i},-1)"${i===0?' disabled':''}>▲</button>
+        <button class="move-btn" onclick="moveRule('${col}',${i},1)"${i===rules.length-1?' disabled':''}>▼</button>
+      </div>
+      <div class="checkbox" onclick="tick('${col}',${i})">
+        <svg class="checkmark" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="rule-text" onclick="tick('${col}',${i})">${esc(rule)}</span>
+    </div>`;
+  }).join('');
+
+  const total = rules.length;
+  const met   = Object.keys(checks).filter(k => checks[k] && +k < total).length;
+  setProgress(col, met, total);
+  setSignal(col, met, total);
+}
+
+function setProgress(col, met, total) {
+  const pct = total > 0 ? (met/total)*100 : 0;
+  const fill = document.getElementById(col+'ProgressFill');
+  const lbl  = document.getElementById(col+'ProgressLabel');
+  if (fill) fill.style.width = pct+'%';
+  if (lbl)  lbl.textContent  = met+' of '+total;
+}
+
+function setSignal(col, met, total) {
+  const box  = document.getElementById(col+'SignalBox');
+  const text = document.getElementById(col+'SignalText');
+  if (!box || !text) return;
+  const ready = total > 0 && met === total;
+  if (ready) {
+    if (col==='buy')  { box.className='sig on-buy';  text.textContent='▲ BUY'; }
+    if (col==='sell') { box.className='sig on-sell'; text.textContent='▼ SELL'; }
+    if (col==='mid')  { box.className='sig on-mid';  text.textContent='✓ OK'; }
+  } else {
+    box.className = 'sig';
+    text.textContent = total === 0 ? '—' : met+'/'+total;
+  }
+}
+
+/* ── TICK ── */
+function tick(col, i) {
+  const key = String(i);
+  const wasOn = !!state[col].checks[key];
+  state[col].checks[key] = !wasOn;
+  if (!wasOn) {
+    if (col==='buy')  { delete state.sell.checks[key]; renderCol('sell'); }
+    if (col==='sell') { delete state.buy.checks[key];  renderCol('buy'); }
+  }
+  persist();
+  renderCol(col);
+}
+
+/* ── MOVE ── */
+function moveRule(col, i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= state[col].rules.length) return;
+  if (col==='buy'||col==='sell') swap(state[col==='buy'?'sell':'buy'], i, j);
+  swap(state[col], i, j);
+  persist(); renderAll();
+  if (editOpen[col]) renderEditPanel(col);
+}
+function swap(s, i, j) {
+  [s.rules[i],s.rules[j]]=[s.rules[j],s.rules[i]];
+  const a=!!s.checks[String(i)], b=!!s.checks[String(j)];
+  b ? s.checks[String(i)]=true : delete s.checks[String(i)];
+  a ? s.checks[String(j)]=true : delete s.checks[String(j)];
+}
+
+/* ── RESET ── */
+function resetAll() {
+  state.buy.checks={}; state.mid.checks={}; state.sell.checks={};
+  persist(); renderAll();
+}
+
+/* ── EDIT ── */
+function toggleEdit(col) {
+  editOpen[col] = !editOpen[col];
+  const panel = document.getElementById(col+'EditPanel');
+  const btn   = document.getElementById(col+'EditBtn');
+  if (editOpen[col]) {
+    panel.classList.add('open');
+    btn.textContent = '✕ Close';
+    renderEditPanel(col);
+  } else {
+    panel.classList.remove('open');
+    btn.textContent = '✎ Edit';
+  }
+}
+
+function renderEditPanel(col) {
+  const rows = document.getElementById(col+'EditRows');
+  if (!rows) return;
+  rows.innerHTML = state[col].rules.map((r,i)=>`
+    <div class="edit-row">
+      <input class="edit-input" type="text" value="${esc(r)}"
+             onchange="state['${col}'].rules[${i}]=this.value"
+             oninput="state['${col}'].rules[${i}]=this.value"
+             placeholder="Enter rule...">
+      <button class="del-btn" onclick="delRule('${col}',${i})">×</button>
+    </div>`).join('');
+}
+
+function addRow(col) {
+  state[col].rules.push('');
+  if (col==='buy')  state.sell.rules.push('');
+  if (col==='sell') state.buy.rules.push('');
+  renderEditPanel(col);
+}
+
+function delRule(col, i) {
+  state[col].rules.splice(i,1);
+  if (col==='buy')  state.sell.rules.splice(i,1);
+  if (col==='sell') state.buy.rules.splice(i,1);
+  // reindex checks
+  ['buy','sell','mid'].forEach(c => {
+    const nc = {};
+    state[c].rules.forEach((_,idx) => {
+      const ok = idx >= i ? String(idx+1) : String(idx);
+      if (state[c].checks[ok]) nc[String(idx)] = true;
+    });
+    state[c].checks = nc;
+  });
+  persist(); renderAll();
+  if (editOpen[col]) renderEditPanel(col);
+}
+
+function saveRules(col) {
+  // Read all current input values into state
+  const inputs = document.querySelectorAll('#'+col+'EditRows .edit-input');
+  inputs.forEach((inp, i) => {
+    const val = inp.value;
+    state[col].rules[i] = val;
+    if (col==='buy'  && (!state.sell.rules[i] || state.sell.rules[i]===''))
+      state.sell.rules[i] = invertRule(val);
+    if (col==='sell' && (!state.buy.rules[i]  || state.buy.rules[i] ===''))
+      state.buy.rules[i]  = invertRule(val);
+  });
+  persist();
+  renderAll();
+  // Close edit panel
+  editOpen[col] = true; // force toggleEdit to close it
+  toggleEdit(col);
+}
+
+/* ── BACKUP / RESTORE ── */
+function backupData() {
+  const blob = new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),state},null,2)],{type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'signal-checker-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function restoreData(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.state||!data.state.buy||!data.state.sell||!data.state.mid) {
+        alert('Invalid backup file.'); return;
+      }
+      state = data.state;
+      // Ensure checks exist
+      ['buy','mid','sell'].forEach(c => { if (!state[c].checks) state[c].checks = {}; });
+      persist(); renderAll();
+      alert('Restored successfully!');
+    } catch(err) { alert('Could not read backup file.'); }
+    ev.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── INIT ── */
+loadState();
+renderAll();
+</script>
+</body>
+</html>
